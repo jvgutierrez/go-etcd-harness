@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	etcd "github.com/coreos/etcd/client"
-	"github.com/mwitkow/go-etcd-harness"
+	etcd_harness "github.com/jvgutierrez/go-etcd-harness"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	etcd "go.etcd.io/etcd/client/v2"
 	"golang.org/x/net/context"
 )
 
