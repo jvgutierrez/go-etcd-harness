@@ -58,6 +58,7 @@ func New(etcdErrWriter io.Writer) (*Harness, error) {
 		etcdBinary,
 		"--log-package-levels=etcdmain=WARNING,etcdserver=WARNING,raft=WARNING",
 		"--force-new-cluster="+"true",
+		"--enable-v2="+"true",
 		"--data-dir="+s.etcdDir,
 		"--listen-peer-urls="+peer,
 		"--initial-cluster="+"default="+peer+"",
