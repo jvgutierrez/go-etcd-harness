@@ -5,6 +5,7 @@
 package etcd_harness
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,8 +14,7 @@ import (
 	"os/exec"
 	"time"
 
-	etcd "go.etcd.io/etcd/client/v2"
-	"golang.org/x/net/context"
+	etcd "go.etcd.io/etcd/client"
 )
 
 // Harness represents a running etcd server for an integraiton test environment.
