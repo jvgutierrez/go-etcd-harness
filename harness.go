@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -48,7 +47,7 @@ func New(etcdErrWriter io.Writer) (*Harness, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.etcdDir, err = ioutil.TempDir("/tmp", "etcd_testserver")
+	s.etcdDir, err = os.MkdirTemp("", "etcd_testserver")
 	if err != nil {
 		return nil, fmt.Errorf("failed allocating new dir: %v", err)
 	}
@@ -66,30 +65,30 @@ func New(etcdErrWriter io.Writer) (*Harness, error) {
 		"--advertise-client-urls="+endpoint,
 		"--listen-client-urls="+endpoint)
 	s.etcdServer.Stderr = s.errWriter
-	s.etcdServer.Stdout = ioutil.Discard
+	s.etcdServer.Stdout = io.Discard
 	s.Endpoint = endpoint
 	if err := s.etcdServer.Start(); err != nil {
 		s.Stop()
-		return nil, fmt.Errorf("cannot start etcd: %v, will clean up", err)
+		return nil, fmt.Errorf("cannot start etcd: %w, will clean up", err)
 	}
 	s.Client, err = etcd.New(etcd.Config{Endpoints: []string{endpoint}})
 	if err != nil {
 		s.Stop()
-		return s, fmt.Errorf("failed allocating client: %v, will clean up", err)
+		return s, fmt.Errorf("failed allocating client: %w, will clean up", err)
 	}
 	if err := s.pollEtcdForReadiness(); err != nil {
 		s.Stop()
-		return nil, fmt.Errorf("%v, will clean up", err)
+		return nil, fmt.Errorf("%w, will clean up", err)
 	}
 	return s, nil
 }
 
 func (s *Harness) pollEtcdForReadiness() error {
 	api := etcd.NewKeysAPI(s.Client)
-	// Actively poll for etcd coming up for 3 seconds every 50 milliseconds.
-	for i := 0; i < 20; i++ {
-		until := time.Now().Add(200 * time.Millisecond)
-		ctx, _ := context.WithDeadline(context.TODO(), until)
+	deadline := time.Now().Add(4 * time.Second)
+	for time.Now().Before(deadline) {
+		until := time.Now().Add(100 * time.Millisecond)
+		ctx, _ := context.WithDeadline(context.Background(), until)
 		_, err := api.Get(ctx, "/", &etcd.GetOptions{})
 		if err == nil {
 			return nil
