@@ -55,7 +55,7 @@ func New(etcdErrWriter io.Writer) (*Harness, error) {
 	peer := "http://" + peerAddress
 	s.etcdServer = exec.Command(
 		etcdBinary,
-		"--log-package-levels=etcdmain=WARNING,etcdserver=WARNING,raft=WARNING",
+		"--log-level="+"warn",
 		"--force-new-cluster="+"true",
 		"--enable-v2="+"true",
 		"--data-dir="+s.etcdDir,
